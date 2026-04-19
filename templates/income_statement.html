@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card card-soft"><div class="card-body">
+      <h3>Ingresos</h3>
+      <table class="table">
+        <thead><tr><th>Cuenta</th><th>Nombre</th><th class="amount">Importe</th></tr></thead>
+        <tbody>
+          {% for code, name, amount in incomes %}
+          <tr><td>{{ code }}</td><td>{{ name }}</td><td class="amount">{{ format_amount(amount) }}</td></tr>
+          {% else %}
+          <tr><td colspan="3">No hay ingresos.</td></tr>
+          {% endfor %}
+        </tbody>
+        <tfoot><tr><th colspan="2">Total ingresos</th><th class="amount">{{ format_amount(total_income) }}</th></tr></tfoot>
+      </table>
+    </div></div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card card-soft"><div class="card-body">
+      <h3>Gastos</h3>
+      <table class="table">
+        <thead><tr><th>Cuenta</th><th>Nombre</th><th class="amount">Importe</th></tr></thead>
+        <tbody>
+          {% for code, name, amount in expenses %}
+          <tr><td>{{ code }}</td><td>{{ name }}</td><td class="amount">{{ format_amount(amount) }}</td></tr>
+          {% else %}
+          <tr><td colspan="3">No hay gastos.</td></tr>
+          {% endfor %}
+        </tbody>
+        <tfoot><tr><th colspan="2">Total gastos</th><th class="amount">{{ format_amount(total_expense) }}</th></tr></tfoot>
+      </table>
+    </div></div>
+  </div>
+</div>
+<div class="card card-soft mt-4"><div class="card-body">
+  <h3>Resultado del ejercicio</h3>
+  <h2>{{ format_amount(result) }}</h2>
+  <div class="small-note">
+    {% if result > 0 %}La empresa tiene beneficio.{% elif result < 0 %}La empresa tiene pérdida.{% else %}La empresa está en equilibrio.{% endif %}
+  </div>
+</div></div>
+{% endblock %}
