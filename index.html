@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row g-4 mb-4">
+  <div class="col-12 col-xl-3"><div class="card card-soft"><div class="card-body"><div class="small-note">Alumno actual</div><h4>{{ student_name }}</h4></div></div></div>
+  <div class="col-6 col-xl-2"><div class="card card-soft"><div class="card-body"><div class="small-note">Asientos</div><h3>{{ total_entries }}</h3></div></div></div>
+  <div class="col-6 col-xl-2"><div class="card card-soft"><div class="card-body"><div class="small-note">Líneas</div><h3>{{ total_lines }}</h3></div></div></div>
+  <div class="col-6 col-xl-2"><div class="card card-soft"><div class="card-body"><div class="small-note">Ingresos</div><h3>{{ total_income }}</h3></div></div></div>
+  <div class="col-6 col-xl-1"><div class="card card-soft"><div class="card-body"><div class="small-note">Gastos</div><h3>{{ total_expense }}</h3></div></div></div>
+  <div class="col-12 col-xl-2"><div class="card card-soft"><div class="card-body"><div class="small-note">Resultado</div><h3>{{ result }}</h3></div></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card card-soft">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Últimos asientos</h4>
+          <a class="btn btn-dark" href="{{ url_for('new_entry', student=student_name) }}">Nuevo asiento</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead><tr><th>Asiento</th><th>Fecha</th><th>Concepto</th><th>Líneas</th><th></th></tr></thead>
+            <tbody>
+            {% for entry in entries %}
+              <tr>
+                <td>{{ entry.entry_number }}</td>
+                <td>{{ entry.entry_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ entry.concept }}</td>
+                <td>{{ entry.lines|length }}</td>
+                <td class="text-end"><a class="btn btn-outline-secondary btn-sm" href="{{ url_for('edit_entry', entry_id=entry.id, student=student_name) }}">Editar</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5">Todavía no hay asientos para este alumno o grupo.</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card card-soft mb-4"><div class="card-body">
+      <h4>Uso rápido</h4>
+      <p class="small-note">La navegación está arriba, no abajo. Así evitas el problema de resolución que tenías en la app de escritorio.</p>
+      <div class="d-grid gap-2">
+        <a class="btn btn-outline-dark" href="{{ url_for('journal', student=student_name) }}">Ver diario</a>
+        <a class="btn btn-outline-dark" href="{{ url_for('ledger', student=student_name) }}">Ver mayor</a>
+        <a class="btn btn-outline-dark" href="{{ url_for('income_statement_view', student=student_name) }}">Cuenta de resultados</a>
+        <a class="btn btn-outline-dark" href="{{ url_for('balance_sheet_view', student=student_name) }}">Balance</a>
+        <a class="btn btn-outline-dark" href="{{ url_for('export_csv', student=student_name) }}">Exportar CSV</a>
+      </div>
+    </div></div>
+    <div class="card card-soft"><div class="card-body">
+      <h4>Datos de ejemplo</h4>
+      <p class="small-note">Carga tres asientos de prueba para enseñar a los alumnos sin empezar desde cero.</p>
+      <form method="post" action="{{ url_for('seed_demo_data', student=student_name) }}">
+        <button class="btn btn-dark" type="submit">Cargar ejemplo</button>
+      </form>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

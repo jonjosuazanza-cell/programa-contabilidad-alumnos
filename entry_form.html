@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card card-soft">
+  <div class="card-body">
+    <h3 class="mb-3">{% if mode == 'new' %}Nuevo asiento{% else %}Editar asiento{% endif %}</h3>
+    <form method="post" id="entryForm">
+      <div class="row g-3 mb-3">
+        <div class="col-md-3">
+          <label class="form-label">Alumno o grupo</label>
+          <input class="form-control" name="student_name" value="{{ entry.student_name if entry else student_name }}">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Número de asiento</label>
+          <input class="form-control" name="entry_number" value="{{ entry.entry_number if entry else suggested_number }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Fecha</label>
+          <input class="form-control" type="date" name="entry_date" value="{{ entry.entry_date.strftime('%Y-%m-%d') if entry else today }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Concepto general</label>
+          <input class="form-control" name="concept" value="{{ entry.concept if entry else '' }}">
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Líneas del asiento</h5>
+        <button class="btn btn-outline-dark btn-sm" type="button" onclick="addRow()">Añadir línea</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle" id="linesTable">
+          <thead>
+            <tr>
+              <th style="min-width:120px">Código</th>
+              <th style="min-width:240px">Nombre cuenta</th>
+              <th style="min-width:240px">Concepto línea</th>
+              <th style="min-width:120px">Debe</th>
+              <th style="min-width:120px">Haber</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if entry and entry.lines %}
+              {% for line in entry.lines %}
+                <tr>
+                  <td><input class="form-control" name="account_code[]" value="{{ line.account_code }}"></td>
+                  <td><input class="form-control" name="account_name[]" value="{{ line.account_name }}"></td>
+                  <td><input class="form-control" name="line_concept[]" value="{{ line.line_concept }}"></td>
+                  <td><input class="form-control amount-input" name="debit[]" value="{{ '%.2f'|format(line.debit) if line.debit else '' }}"></td>
+                  <td><input class="form-control amount-input" name="credit[]" value="{{ '%.2f'|format(line.credit) if line.credit else '' }}"></td>
+                  <td><button class="btn btn-outline-danger btn-sm" type="button" onclick="removeRow(this)">Quitar</button></td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              {% for _ in range(4) %}
+              <tr>
+                <td><input class="form-control" name="account_code[]"></td>
+                <td><input class="form-control" name="account_name[]"></td>
+                <td><input class="form-control" name="line_concept[]"></td>
+                <td><input class="form-control amount-input" name="debit[]"></td>
+                <td><input class="form-control amount-input" name="credit[]"></td>
+                <td><button class="btn btn-outline-danger btn-sm" type="button" onclick="removeRow(this)">Quitar</button></td>
+              </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="3" class="text-end">Totales</th>
+              <th><input class="form-control" id="totalDebit" readonly></th>
+              <th><input class="form-control" id="totalCredit" readonly></th>
+              <th><span id="squareStatus" class="small-note">Pendiente</span></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-dark" type="submit">Guardar asiento</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('entries_list', student=student_name) }}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function addRow() {
+  const tbody = document.querySelector('#linesTable tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="form-control" name="account_code[]"></td>
+    <td><input class="form-control" name="account_name[]"></td>
+    <td><input class="form-control" name="line_concept[]"></td>
+    <td><input class="form-control amount-input" name="debit[]"></td>
+    <td><input class="form-control amount-input" name="credit[]"></td>
+    <td><button class="btn btn-outline-danger btn-sm" type="button" onclick="removeRow(this)">Quitar</button></td>`;
+  tbody.appendChild(tr);
+  bindAmountListeners();
+}
+function removeRow(btn) {
+  const rows = document.querySelectorAll('#linesTable tbody tr');
+  if (rows.length <= 2) return;
+  btn.closest('tr').remove();
+  recalcTotals();
+}
+function parseVal(v) {
+  if (!v) return 0;
+  return parseFloat(String(v).replace(',', '.')) || 0;
+}
+function recalcTotals() {
+  let debit = 0, credit = 0;
+  document.querySelectorAll('input[name="debit[]"]').forEach(el => debit += parseVal(el.value));
+  document.querySelectorAll('input[name="credit[]"]').forEach(el => credit += parseVal(el.value));
+  document.getElementById('totalDebit').value = debit.toFixed(2);
+  document.getElementById('totalCredit').value = credit.toFixed(2);
+  const status = document.getElementById('squareStatus');
+  status.textContent = debit > 0 && debit.toFixed(2) === credit.toFixed(2) ? 'Asiento cuadrado' : 'Asiento no cuadrado';
+}
+function bindAmountListeners() {
+  document.querySelectorAll('.amount-input').forEach(el => {
+    el.removeEventListener('input', recalcTotals);
+    el.addEventListener('input', recalcTotals);
+  });
+}
+bindAmountListeners();
+recalcTotals();
+</script>
+{% endblock %}

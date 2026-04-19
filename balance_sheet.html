@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4"><div class="card card-soft"><div class="card-body">
+    <h3>Activo</h3>
+    <table class="table table-sm">
+      <tbody>
+      {% for code, name, amount in asset %}
+        <tr><td>{{ code }}</td><td>{{ name }}</td><td class="amount">{{ format_amount(amount) }}</td></tr>
+      {% else %}
+        <tr><td colspan="3">No hay cuentas de activo.</td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="2">Total activo</th><th class="amount">{{ format_amount(total_asset) }}</th></tr></tfoot>
+    </table>
+  </div></div></div>
+  <div class="col-lg-4"><div class="card card-soft"><div class="card-body">
+    <h3>Pasivo</h3>
+    <table class="table table-sm">
+      <tbody>
+      {% for code, name, amount in liability %}
+        <tr><td>{{ code }}</td><td>{{ name }}</td><td class="amount">{{ format_amount(amount) }}</td></tr>
+      {% else %}
+        <tr><td colspan="3">No hay cuentas de pasivo.</td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="2">Total pasivo</th><th class="amount">{{ format_amount(total_liability) }}</th></tr></tfoot>
+    </table>
+  </div></div></div>
+  <div class="col-lg-4"><div class="card card-soft"><div class="card-body">
+    <h3>Patrimonio neto</h3>
+    <table class="table table-sm">
+      <tbody>
+      {% for code, name, amount in equity %}
+        <tr><td>{{ code }}</td><td>{{ name }}</td><td class="amount">{{ format_amount(amount) }}</td></tr>
+      {% else %}
+        <tr><td colspan="3">No hay patrimonio neto.</td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="2">Total patrimonio neto</th><th class="amount">{{ format_amount(total_equity) }}</th></tr></tfoot>
+    </table>
+  </div></div></div>
+</div>
+<div class="card card-soft mt-4"><div class="card-body">
+  <h4>Comprobación</h4>
+  <p class="mb-0">Activo: <strong>{{ format_amount(total_asset) }}</strong> | Pasivo + Patrimonio neto: <strong>{{ format_amount(total_liability + total_equity) }}</strong></p>
+</div></div>
+{% endblock %}

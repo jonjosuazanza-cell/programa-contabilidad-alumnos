@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card card-soft"><div class="card-body">
+      <h3 class="mb-3">Libro mayor</h3>
+      <form method="get">
+        <input type="hidden" name="student" value="{{ student_name }}">
+        <label class="form-label">Selecciona una cuenta</label>
+        <select class="form-select mb-3" name="account_code" onchange="this.form.submit()">
+          <option value="">-- elegir cuenta --</option>
+          {% for code, data in balances.items()|sort %}
+            <option value="{{ code }}" {% if selected_code == code %}selected{% endif %}>{{ code }} - {{ data.name }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card card-soft"><div class="card-body">
+      {% if selected %}
+      <h4>{{ selected_code }} - {{ selected.name }}</h4>
+      <div class="small-note mb-3">Saldo final: {{ format_amount(selected.balance) }}</div>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead><tr><th>Fecha</th><th>Asiento</th><th>Concepto</th><th class="amount">Debe</th><th class="amount">Haber</th><th class="amount">Saldo</th></tr></thead>
+          <tbody>
+            {% set running = namespace(value=0) %}
+            {% for mov in selected.movements %}
+              {% set running.value = running.value + (mov.debit - mov.credit) %}
+              <tr>
+                <td>{{ mov.entry_date }}</td>
+                <td>{{ mov.entry_number }}</td>
+                <td>{{ mov.line_concept or mov.general_concept }}</td>
+                <td class="amount">{{ format_amount(mov.debit) }}</td>
+                <td class="amount">{{ format_amount(mov.credit) }}</td>
+                <td class="amount">{{ format_amount(running.value) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>Selecciona una cuenta para ver sus movimientos.</p>
+      {% endif %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}
